@@ -572,6 +572,7 @@ public class JMeterThread implements Runnable, Interruptible {
         // If we got any results, then perform processing on the result
         if (result != null) {
             if (!result.isIgnore()) {
+                result.setCaseController(pack.getControllers());
                 int nbActiveThreadsInThreadGroup = threadGroup.getNumberOfThreads();
                 int nbTotalActiveThreads = JMeterContextService.getNumberOfThreads();
                 fillThreadInformation(result, nbActiveThreadsInThreadGroup, nbTotalActiveThreads);

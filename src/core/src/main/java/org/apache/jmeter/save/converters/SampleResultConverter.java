@@ -330,6 +330,7 @@ public class SampleResultConverter extends AbstractCollectionConverter {
            writer.addAttribute(ATT_GRP_THRDS, String.valueOf(res.getGroupThreads()));
            writer.addAttribute(ATT_ALL_THRDS, String.valueOf(res.getAllThreads()));
         }
+        writer.addAttribute("case-name", res.getCaseName());
         SampleEvent event = (SampleEvent) context.get(SaveService.SAMPLE_EVENT_OBJECT);
         if (event != null) {
             if (save.saveHostname()){
@@ -452,6 +453,10 @@ public class SampleResultConverter extends AbstractCollectionConverter {
         res.setErrorCount(Converter.getInt(reader.getAttribute(ATT_ERROR_COUNT),0)); // default is 0
         res.setGroupThreads(Converter.getInt(reader.getAttribute(ATT_GRP_THRDS)));
         res.setAllThreads(Converter.getInt(reader.getAttribute(ATT_ALL_THRDS)));
+        String caseName = reader.getAttribute("case-name");
+        if (caseName != null) {
+            res.setCaseName(ConversionHelp.decode(caseName));
+        }
     }
 
     protected void readFile(String resultFileName, SampleResult res) {

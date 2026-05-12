@@ -226,4 +226,11 @@ public class SamplePackage {
         return configs;
     }
 
+    /**
+     * @return List of {@link Controller}
+     */
+    public List<Controller> getControllers() {
+        return controllers;
+    }
+
 }

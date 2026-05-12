@@ -265,6 +265,8 @@ public class SampleResult implements Serializable, Cloneable, Searchable {
 
     private long sentBytes;
 
+    private String caseName = "";
+
     private URL location;
 
     private transient boolean ignore;
@@ -331,6 +333,7 @@ public class SampleResult implements Serializable, Cloneable, Searchable {
         samplerData = res.samplerData;
         saveConfig = res.saveConfig;
         sentBytes = res.sentBytes;
+        caseName = res.caseName;
         startTime = res.startTime;//OK
         stopTest = res.stopTest;
         stopTestNow = res.stopTestNow;
@@ -1449,6 +1452,27 @@ public class SampleResult implements Serializable, Cloneable, Searchable {
      */
     public void setParent(SampleResult parent) {
         this.parent = parent;
+    }
+
+    public String getCaseName() {
+        return caseName;
+    }
+
+    public void setCaseName(String caseName) {
+        this.caseName = caseName;
+    }
+
+    /**
+     * Set caseName from the parent CaseController in the controller hierarchy.
+     */
+    public void setCaseController(List<org.apache.jmeter.control.Controller> controllers) {
+        for (org.apache.jmeter.control.Controller controller : controllers) {
+            String[] s = controller.getClass().getName().split("\\.");
+            if ("CaseController".equals(s[s.length - 1])) {
+                caseName = controller.getPropertyAsString("CaseController.case_name");
+                return;
+            }
+        }
     }
 
     public String getResultFileName() {
