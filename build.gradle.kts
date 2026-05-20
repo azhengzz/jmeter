@@ -55,6 +55,19 @@ val notPublishedProjects by extra {
         projects.src.dist,
         projects.src.distCheck,
         projects.src.examples,
+        projects.src.extension,
+        projects.src.extension.assertions,
+        projects.src.extension.config,
+        projects.src.extension.control,
+        projects.src.extension.extractor,
+        projects.src.extension.giteeFunctions,
+        projects.src.extension.protocolGit,
+        projects.src.extension.protocolHttpud,
+        projects.src.extension.protocolS3,
+        projects.src.extension.threads,
+        projects.src.extension.util,
+        projects.src.extension.visualizers,
+        projects.src.extension.casutg,
         projects.src.generator,
         projects.src.licenses,
         projects.src.protocol,
@@ -149,5 +162,118 @@ releaseParams {
             // org.apache.jmeter at repository.apache.org
             stagingProfileId.set("4d29c092016673")
         }
+    }
+}
+
+// ============================================================
+// 二次开发插件打包（自动发现 src/extension/ 下所有子模块）
+//   ./gradlew listPluginDeps
+//   ./gradlew packagePlugins
+//   ./gradlew installToJmeter -PtargetJmeter=/path/to/jmeter
+// 新增模块只需在 settings.gradle.kts / build.gradle.kts / dist 注册即可自动生效
+// 第三方依赖自动检测：扩展模块 classpath - 原版JMeter classpath = 额外依赖
+// ============================================================
+val extModules: List<String> = file("src/extension").listFiles()
+    ?.filter { it.isDirectory && it.resolve("build.gradle.kts").exists() }
+    ?.map { "src:extension:${it.name}" }
+    ?: emptyList()
+
+// 扩展模块的完整 runtime classpath
+val extensionRuntime = configurations.create("extensionRuntime")
+extModules.forEach { mod ->
+    extensionRuntime.dependencies.add(dependencies.create(project(":$mod")))
+}
+
+// 原版 JMeter 的 runtime classpath（components -> core -> jorphan -> ...）
+val stockRuntime = configurations.create("stockRuntime")
+stockRuntime.dependencies.add(dependencies.create(project(":src:components")))
+
+// 差集 = 扩展模块额外引入的第三方依赖（自动排除原版JMeter已有的和插件自身JAR）
+val extraPluginDeps = extensionRuntime
+    .minus(stockRuntime)
+    .filter { !it.name.startsWith("jmeter-plugins-gitee-") }
+
+tasks.register("listPluginDeps") {
+    group = "plugin-packaging"
+    description = "列出扩展JAR及其新增第三方依赖（自动发现、自动检测）"
+
+    dependsOn(extModules.map { ":${it}:jar" })
+
+    doLast {
+        println("\n=== 扩展 JAR (${extModules.size}个，自动发现) ===")
+        extModules.forEach { m ->
+            println("  lib/ext/jmeter-plugins-gitee-${m.substringAfterLast(":")}.jar")
+        }
+        println("\n=== 新增第三方依赖（原版JMeter不含，自动检测 ${extraPluginDeps.files.size}个）===")
+        extraPluginDeps.files.sortedBy { it.name }.forEach { jar ->
+            println("  ${jar.name}")
+        }
+    }
+}
+
+tasks.register<Copy>("packagePlugins") {
+    group = "plugin-packaging"
+    description = "打包全部扩展JAR及第三方依赖到 plugin-package/（自动发现模块）"
+
+    val out = layout.projectDirectory.dir("plugin-package")
+    into(out)
+
+    // 插件 JAR -> lib/ext/
+    into("lib/ext") {
+        extModules.forEach { dependsOn(":${it}:jar"); from(tasks.getByPath(":${it}:jar").outputs.files) }
+        rename("(.*)-[0-9].*\\.jar$", "$1.jar")
+    }
+
+    // 新增第三方依赖 -> lib/（自动检测差集）
+    into("lib") {
+        from(extraPluginDeps)
+    }
+
+    doLast { println("打包完成 (${extModules.size}个插件JAR + ${extraPluginDeps.files.size}个第三方依赖): ${out.asFile}") }
+}
+
+tasks.register("installToJmeter") {
+    group = "plugin-packaging"
+    description = "安装扩展JAR及第三方依赖到目标JMeter目录 (-PtargetJmeter=路径，基于目标lib/自动检测)"
+
+    val target = project.findProperty("targetJmeter") as? String
+        ?: throw GradleException("请指定: -PtargetJmeter=/path/to/jmeter-5.6.3")
+    val root = file(target)
+    if (!root.resolve("bin/jmeter.bat").exists() && !root.resolve("bin/jmeter").exists())
+        throw GradleException("$target 不是合法JMeter目录")
+
+    dependsOn(extModules.map { ":${it}:jar" })
+
+    doLast {
+        val targetLib = File(root, "lib")
+        val targetExt = File(root, "lib/ext")
+
+        // 从 jar 文件名中剥离版本号，如 xmlbeans-3.1.0.jar -> xmlbeans
+        fun baseName(name: String) = name.replaceFirst(Regex("-[\\d.]+.*\\.jar$"), "")
+
+        // 1. 复制插件 JAR（去掉版本号）
+        extModules.forEach { mod ->
+            val jarTask = tasks.getByPath(":${mod}:jar")
+            jarTask.outputs.files.forEach { jar ->
+                val newName = jar.name.replaceFirst(Regex("-[\\d.]+.*\\.jar$"), ".jar")
+                jar.copyTo(File(targetExt, newName), overwrite = true)
+            }
+        }
+
+        // 2. 收集目标 lib/ 中已有的 jar 基名（用于去重）
+        val existing = targetLib.listFiles()
+            ?.filter { it.name.endsWith(".jar") }
+            ?.map { baseName(it.name) }
+            ?.toSet() ?: emptySet()
+
+        // 3. 复制扩展模块的传递依赖（目标 lib/ 中没有的）
+        val newDeps = extensionRuntime.files
+            .filter { !it.name.startsWith("jmeter-plugins-gitee-") }
+            .filter { baseName(it.name) !in existing }
+        newDeps.forEach { jar ->
+            jar.copyTo(File(targetLib, jar.name), overwrite = true)
+        }
+
+        println("已安装 ${extModules.size} 个插件JAR + ${newDeps.size}个新增第三方依赖到: $target")
     }
 }

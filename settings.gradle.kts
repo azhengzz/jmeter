@@ -83,7 +83,19 @@ include(
     "src:testkit-wiremock",
     "src:test-services",
     "src:dist",
-    "src:dist-check"
+    "src:dist-check",
+    "src:extension:assertions",
+    "src:extension:config",
+    "src:extension:control",
+    "src:extension:extractor",
+    "src:extension:gitee-functions",
+    "src:extension:protocol-git",
+    "src:extension:protocol-httpud",
+    "src:extension:protocol-s3",
+    "src:extension:threads",
+    "src:extension:util",
+    "src:extension:visualizers",
+    "src:extension:casutg"
 )
 
 // See https://github.com/gradle/gradle/issues/1348#issuecomment-284758705 and

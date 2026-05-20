@@ -49,7 +49,19 @@ var jars = arrayOf(
     ":src:protocol:mail",
     ":src:protocol:mongodb",
     ":src:protocol:native",
-    ":src:protocol:tcp"
+    ":src:protocol:tcp",
+    ":src:extension:assertions",
+    ":src:extension:config",
+    ":src:extension:control",
+    ":src:extension:extractor",
+    ":src:extension:gitee-functions",
+    ":src:extension:protocol-git",
+    ":src:extension:protocol-httpud",
+    ":src:extension:protocol-s3",
+    ":src:extension:threads",
+    ":src:extension:util",
+    ":src:extension:visualizers",
+    ":src:extension:casutg"
 )
 
 // https://github.com/gradle/gradle/pull/16627
