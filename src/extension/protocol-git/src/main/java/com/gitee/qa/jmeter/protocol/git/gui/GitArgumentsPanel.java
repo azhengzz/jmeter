@@ -10,10 +10,16 @@ import org.apache.jmeter.testelement.property.JMeterProperty;
 import org.apache.jorphan.gui.ObjectTableModel;
 import org.apache.jorphan.reflect.Functor;
 
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 
 public class GitArgumentsPanel extends ArgumentsPanel {
+
+    @Override
+    public Collection<String> getMenuCategories() {
+        return null;
+    }
 
     public GitArgumentsPanel() {
         super();

@@ -16,6 +16,7 @@ import org.apache.jorphan.reflect.Functor;
 import javax.swing.*;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
@@ -23,6 +24,11 @@ import java.util.Objects;
 public class S3ArgumentsPanel extends ArgumentsPanel {
 
     private static final long serialVersionUID = 240L;
+
+    @Override
+    public Collection<String> getMenuCategories() {
+        return null;
+    }
 
     private static final String NAME = "参数名";
     private static final String VALUE = "参数值";

@@ -12,11 +12,17 @@ import org.apache.jorphan.reflect.Functor;
 import javax.swing.*;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
+import java.util.Collection;
 import java.util.Iterator;
 
 public class ParameterTestFragmentReturnValuePanel extends ArgumentsPanel {
 
     private static final long serialVersionUID = 240L;
+
+    @Override
+    public Collection<String> getMenuCategories() {
+        return null;
+    }
 
     private static final String NAME = "返回变量名";
     private static final String DESCRIPTION = "返回变量说明";

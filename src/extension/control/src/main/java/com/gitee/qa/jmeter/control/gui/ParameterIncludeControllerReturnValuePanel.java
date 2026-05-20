@@ -15,11 +15,17 @@ import org.apache.jorphan.reflect.Functor;
 import javax.swing.*;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
+import java.util.Collection;
 import java.util.Iterator;
 
 public class ParameterIncludeControllerReturnValuePanel extends ArgumentsPanel {
 
     private static final long serialVersionUID = 240L;
+
+    @Override
+    public Collection<String> getMenuCategories() {
+        return null;
+    }
 
     private static final String NAME = "返回参数";
     private static final String VALUE = "变量名(返回值会保存到当前变量中)";

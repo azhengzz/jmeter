@@ -14,11 +14,17 @@ import org.apache.jorphan.reflect.Functor;
 import javax.swing.*;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableModel;
+import java.util.Collection;
 import java.util.Iterator;
 
 public class ParameterIncludeControllerArgumentsPanel extends ArgumentsPanel {
 
     private static final long serialVersionUID = 240L;
+
+    @Override
+    public Collection<String> getMenuCategories() {
+        return null;
+    }
 
     private static final String NAME = "参数名";
     private static final String VALUE = "参数值";
