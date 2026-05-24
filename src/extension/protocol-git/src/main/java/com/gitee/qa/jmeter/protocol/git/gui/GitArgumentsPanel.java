@@ -53,6 +53,13 @@ public class GitArgumentsPanel extends ArgumentsPanel {
         return args;
     }
 
+    @Override
+    public void configure(TestElement el) {
+        if (el != null) {
+            super.configure(el);
+        }
+   }
+
     /**
      * action: git action, 比如 clone push pull
      * actionChange: 是否是切换了git action
