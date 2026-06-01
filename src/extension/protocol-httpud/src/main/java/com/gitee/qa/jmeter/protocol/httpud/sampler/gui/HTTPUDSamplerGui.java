@@ -165,7 +165,6 @@ public class HTTPUDSamplerGui extends AbstractSamplerGui {
     public void modifyTestElement(TestElement sampler) {
         super.configureTestElement(sampler);
         sampler.setProperty(HTTPUDSampler.VARIABLE_NAME, getSelectedVariableName());
-        sampler.setProperty(HTTPUDSampler.VARIABLE_NAME_DESC, getSelectedVariableNameDesc());
         HTTPUDArgumentsGui.modifyTestElement(sampler);
     }
 
@@ -176,7 +175,7 @@ public class HTTPUDSamplerGui extends AbstractSamplerGui {
     public void configure(TestElement sampler) {
         super.configure(sampler);
         String variableName = sampler.getPropertyAsString(HTTPUDSampler.VARIABLE_NAME);
-        String variableNameDesc = sampler.getPropertyAsString(HTTPUDSampler.VARIABLE_NAME_DESC);
+        String variableNameDesc = findVariableNameDesc(variableName);
         Map<String, String> varMap = new HashMap<String, String>() {{ put(variableName, variableNameDesc); }};
         if (comboBoxContain(varMap)) {
             variableNameComboBox.setSelectedItem(varMap);
@@ -236,12 +235,18 @@ public class HTTPUDSamplerGui extends AbstractSamplerGui {
         Map<String, String> selectedItem = (Map<String, String>) variableNameComboBox.getSelectedItem();
         return selectedItem.keySet().iterator().next();
     }
+
     /**
-     * 获取当前comboBox所选择的标识描述
+     * 根据标识名从测试计划中查找对应的 HTTPUDConfigElement 组件名
      * */
-    private String getSelectedVariableNameDesc() {
-        Map<String, String> selectedItem = (Map<String, String>) variableNameComboBox.getSelectedItem();
-        return selectedItem.get(getSelectedVariableName());
+    private String findVariableNameDesc(String variableName) {
+        Collection<HTTPUDConfigElement> configElements = findHTTPUDConfigElements();
+        for (HTTPUDConfigElement el : configElements) {
+            if (variableName.equals(el.getVariableName())) {
+                return el.getName();
+            }
+        }
+        return "";
     }
 
     /**

@@ -34,7 +34,6 @@ public class HTTPUDSampler extends HTTPSamplerBase {
     private static final Logger LOG = LoggerFactory.getLogger(HTTPUDSampler.class);
 
     public static final String VARIABLE_NAME = "HTTPUDSampler.variable_name"; // $NON-NLS-1$
-    public static final String VARIABLE_NAME_DESC = "HTTPUDSampler.variable_name_desc"; // $NON-NLS-1$
 
     // 当前sampler关联的HTTP User Defined Element Configuration 组件对象
     HTTPUDConfigElement config;
@@ -159,10 +158,6 @@ public class HTTPUDSampler extends HTTPSamplerBase {
 
     public String getVariableName() {
         return getPropertyAsString(VARIABLE_NAME);
-    }
-
-    public String getVariableNameDesc() {
-        return getPropertyAsString(VARIABLE_NAME_DESC);
     }
 
     // 获取HTTPUDSampler传递的参数
