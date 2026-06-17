@@ -19,7 +19,6 @@
 package com.gitee.qa.jmeter.control;
 
 import com.gitee.qa.jmeter.control.util.ParameterIncludeControllerArgument;
-import org.apache.commons.beanutils.PropertyUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.jmeter.config.Arguments;
 import org.apache.jmeter.control.*;
@@ -40,7 +39,6 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.Map;
@@ -109,11 +107,12 @@ public class ParameterIncludeController extends GenericController implements Rep
             checkNotNullArgs();
             JMeterVariables vars = JMeterContextService.getContext().getVariables();
             // 在执行控制器前备份变量池
-            try {
-                PropertyUtils.copyProperties(outerVars, vars);
-            } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-                e.printStackTrace();
-            }
+            // 注意：PropertyUtils.copyProperties 对 JMeterVariables 无效，
+            // 因为其内部存储 Map 并非 JavaBean 属性（没有 setter），
+            // 必须使用 putAll 完整复制变量与 putObject 存储的对象引用，
+            // 否则后续 setVariables(outerVars) 会丢失 HTTPUDConfigElement 等关键对象。
+            outerVars = new JMeterVariables();
+            outerVars.putAll(vars);
             // 如果是测试片段(带参数)，则将参数以及默认值作为jmeter变量
             if (this.testFragmentController instanceof ParameterTestFragmentController) {
                 ParameterTestFragmentController parameterTestFragmentController = (ParameterTestFragmentController) this.testFragmentController;
