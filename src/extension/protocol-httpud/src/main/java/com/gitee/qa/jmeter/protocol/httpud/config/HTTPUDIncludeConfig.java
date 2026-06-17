@@ -55,6 +55,10 @@ public class HTTPUDIncludeConfig extends ConfigTestElement implements Replaceabl
         this.resolveReplacementSubTree(null);
         HTTPUDIncludeConfig clone = (HTTPUDIncludeConfig) super.clone();
         clone.setIncludePath(this.getIncludePath());
+        // 文件元信息（lastFileName/lastFileModifiedTime/lastFileSize）是 mutable 字段，
+        // super.clone() 只是浅拷贝引用；不重置会导致多线程下克隆体共享同一份缓存，
+        // 出现「某线程刚加载完，另一线程误以为文件未修改而跳过加载」的问题。
+        clone.resetFileInfo();
         if (this.subtree != null) {
             if (this.subtree.size() == 1) {
                 for (Object o : this.subtree.keySet()) {

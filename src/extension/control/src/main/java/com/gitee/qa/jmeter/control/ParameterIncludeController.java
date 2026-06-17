@@ -81,6 +81,9 @@ public class ParameterIncludeController extends GenericController implements Rep
         // Perhaps save previous filename, and only load if it has changed?
         this.resolveReplacementSubTree(null);
         ParameterIncludeController clone = (ParameterIncludeController) super.clone();
+        // outerVars 是 mutable 字段，super.clone() 只是浅拷贝引用；
+        // 不重置会导致多线程下所有克隆体共享同一个变量池备份，引发数据竞争。
+        clone.outerVars = new JMeterVariables();
         clone.setIncludePath(this.getIncludePath());
         if (this.subtree != null) {
             if (this.subtree.size() == 1) {
