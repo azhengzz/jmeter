@@ -42,9 +42,7 @@ public class RSAEncrypt extends AbstractFunction{
     private static final int MAX_PARA_COUNT = 3; // 参数最大个数
     private static final int MIN_PARA_COUNT = 2; // 参数最小个数
 
-    private String content; 	// 参数1-明文
-    private String key; 	    // 参数2-密钥
-    private String varName; 	// 参数3-变量名
+    // 参数在execute内以局部变量获取，不使用实例变量
     private Object[] values = null;
 
     // 加解密算法
@@ -88,12 +86,13 @@ public class RSAEncrypt extends AbstractFunction{
          * 该方法如果操作了非线程安全的对象（比如文件），则需要将对该方法进行线程同步保护。
          */
         // 参数必须放到execute进行获取 execute和setParameters不再一个线程上下文执行
-        content = ((CompoundVariable) values[0]).execute().trim(); 		// 将每个参数值获取出来
-        key = ((CompoundVariable) values[1]).execute().trim(); 		// 将每个参数值获取出来
+        // 性能优化改成局部变量
+        String content = ((CompoundVariable) values[0]).execute().trim(); 		// 将每个参数值获取出来
+        String key = ((CompoundVariable) values[1]).execute().trim(); 		// 将每个参数值获取出来
+
+        String varName = null;
         if(values.length > 2) {
             varName = ((CompoundVariable) values[2]).execute().trim(); 		// 将每个参数值获取出来
-        }else {
-            varName = null;
         }
 
         if ("".equals(key)){
