@@ -116,6 +116,11 @@ public class ParameterIncludeController extends GenericController implements Rep
             // 否则后续 setVariables(outerVars) 会丢失 HTTPUDConfigElement 等关键对象。
             outerVars = new JMeterVariables();
             outerVars.putAll(vars);
+            // 将当前Include控制器(带参数)中设置的参数与值作为jmeter变量
+            // 注意：必须在应用测试片段默认值之前读取参数值。
+            // JMeter 5.5+ 默认关闭 function.cache.per.iteration（FunctionProperty 每次读取都会重新解析），
+            // 若在应用测试片段默认值之后再读取，${password} 这类值会被测试片段默认值(空串)覆盖而解析为空。
+            Map<String, String> argsMap = this.getArgumentsAsMap();
             // 如果是测试片段(带参数)，则将参数以及默认值作为jmeter变量
             if (this.testFragmentController instanceof ParameterTestFragmentController) {
                 ParameterTestFragmentController parameterTestFragmentController = (ParameterTestFragmentController) this.testFragmentController;
@@ -124,8 +129,6 @@ public class ParameterIncludeController extends GenericController implements Rep
                     vars.put(key, ptfControllerArgsMap.get(key));
                 }
             }
-            // 将当前Include控制器(带参数)中设置的参数与值作为jmeter变量
-            Map<String, String> argsMap = this.getArgumentsAsMap();
             for (String key: argsMap.keySet()) {
                 vars.put(key, argsMap.get(key));
             }
